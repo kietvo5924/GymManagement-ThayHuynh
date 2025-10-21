@@ -28,10 +28,9 @@ public class SecurityConfig {
                 .securityMatcher("/api/**")
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/auth/verify**", "/api/public/**", "/api/doctors/available").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/auth/verify**", "/api/public/**").permitAll()
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/doctors/**").hasRole("DOCTOR")
 
                         .anyRequest().authenticated()
                 )
@@ -50,7 +49,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Các trang yêu cầu quyền cụ thể
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/doctor/**").hasRole("DOCTOR")
 
                         // Các trang và tài nguyên công khai
                         .requestMatchers(

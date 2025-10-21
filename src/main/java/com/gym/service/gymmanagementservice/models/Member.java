@@ -6,35 +6,39 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "packages")
+@Table(name = "members")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Package {
+public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", length = 100, nullable = false, unique = true)
-    private String name;
+    @Column(name = "fullname", length = 100, nullable = false)
+    private String fullName;
 
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
+    @Column(name = "phone_number", length = 10, nullable = false, unique = true)
+    private String phoneNumber;
 
-    @Column(name = "price", nullable = false, precision = 10, scale = 2)
-    private BigDecimal price;
+    @Column(name = "email", length = 100, unique = true)
+    private String email;
 
-    @Column(name = "duration_days", nullable = false)
-    private Integer durationDays;
+    @Column(name = "birth_date")
+    private LocalDate birthDate;
 
-    @Column(name = "is_active", nullable = false)
-    private boolean isActive = true;
+    @Column(name = "address", length = 255)
+    private String address;
+
+    // Mã vạch để quét khi check-in, CẦN LÀ DUY NHẤT
+    @Column(name = "barcode", length = 50, nullable = false, unique = true)
+    private String barcode;
 
     @Column(name = "created_at")
     private OffsetDateTime createdAt;

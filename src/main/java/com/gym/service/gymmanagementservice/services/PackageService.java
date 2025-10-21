@@ -2,7 +2,7 @@ package com.gym.service.gymmanagementservice.services;
 
 import com.gym.service.gymmanagementservice.dtos.PackageRequestDTO;
 import com.gym.service.gymmanagementservice.dtos.PackageResponseDTO;
-import com.gym.service.gymmanagementservice.models.Package;
+import com.gym.service.gymmanagementservice.models.GymPackage;
 import com.gym.service.gymmanagementservice.repositories.PackageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class PackageService {
             throw new IllegalArgumentException("Tên gói tập đã tồn tại.");
         });
 
-        Package newPackage = Package.builder()
+        GymPackage newGymPackage = GymPackage.builder()
                 .name(request.getName())
                 .description(request.getDescription())
                 .price(request.getPrice())
@@ -31,8 +31,8 @@ public class PackageService {
                 .isActive(true)
                 .build();
 
-        Package savedPackage = packageRepository.save(newPackage);
-        return PackageResponseDTO.fromPackage(savedPackage);
+        GymPackage savedGymPackage = packageRepository.save(newGymPackage);
+        return PackageResponseDTO.fromPackage(savedGymPackage);
     }
 
     public List<PackageResponseDTO> getAllPackages() {
@@ -42,14 +42,14 @@ public class PackageService {
     }
 
     public PackageResponseDTO getPackageById(Long id) {
-        Package pkg = packageRepository.findById(id)
+        GymPackage pkg = packageRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói tập với ID: " + id));
         return PackageResponseDTO.fromPackage(pkg);
     }
 
     @Transactional
     public PackageResponseDTO updatePackage(Long id, PackageRequestDTO request) {
-        Package existingPackage = packageRepository.findById(id)
+        GymPackage existingGymPackage = packageRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói tập với ID: " + id));
 
         packageRepository.findByName(request.getName()).ifPresent(p -> {
@@ -58,21 +58,21 @@ public class PackageService {
             }
         });
 
-        existingPackage.setName(request.getName());
-        existingPackage.setDescription(request.getDescription());
-        existingPackage.setPrice(request.getPrice());
-        existingPackage.setDurationDays(request.getDurationDays());
+        existingGymPackage.setName(request.getName());
+        existingGymPackage.setDescription(request.getDescription());
+        existingGymPackage.setPrice(request.getPrice());
+        existingGymPackage.setDurationDays(request.getDurationDays());
 
-        Package updatedPackage = packageRepository.save(existingPackage);
-        return PackageResponseDTO.fromPackage(updatedPackage);
+        GymPackage updatedGymPackage = packageRepository.save(existingGymPackage);
+        return PackageResponseDTO.fromPackage(updatedGymPackage);
     }
 
     @Transactional
     public void togglePackageStatus(Long id) {
-        Package existingPackage = packageRepository.findById(id)
+        GymPackage existingGymPackage = packageRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói tập với ID: " + id));
 
-        existingPackage.setActive(!existingPackage.isActive());
-        packageRepository.save(existingPackage);
+        existingGymPackage.setActive(!existingGymPackage.isActive());
+        packageRepository.save(existingGymPackage);
     }
 }

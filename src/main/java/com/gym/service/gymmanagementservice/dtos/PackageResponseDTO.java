@@ -1,7 +1,6 @@
 package com.gym.service.gymmanagementservice.dtos;
 
-import com.gym.service.gymmanagementservice.models.Package;
-import com.gym.service.gymmanagementservice.repositories.PackageRepository;
+import com.gym.service.gymmanagementservice.models.GymPackage;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +22,7 @@ public class PackageResponseDTO {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
-    public static PackageResponseDTO fromPackage(Package pkg) {
+    public static PackageResponseDTO fromPackage(GymPackage pkg) {
         return PackageResponseDTO.builder()
                 .id(pkg.getId())
                 .name(pkg.getName())
