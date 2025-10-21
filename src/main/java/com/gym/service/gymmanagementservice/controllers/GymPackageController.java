@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "Package Management API", description = "Các API để quản lý gói tập")
 @SecurityRequirement(name = "bearerAuth")
-public class PackController {
+public class GymPackageController {
 
     private final PackageService packageService;
 

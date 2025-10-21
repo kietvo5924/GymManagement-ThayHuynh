@@ -20,6 +20,7 @@ public class SaleService {
     private final ProductRepository productRepository;
     private final MemberRepository memberRepository;
     private final AuthenticationService authenticationService;
+    private final TransactionRepository transactionRepository;
 
     @Transactional
     public Sale createSale(SaleRequestDTO request) {
@@ -62,6 +63,18 @@ public class SaleService {
         }
 
         sale.setTotalAmount(totalAmount);
-        return saleRepository.save(sale);
+        Sale savedSale = saleRepository.save(sale);
+
+        Transaction transaction = Transaction.builder()
+                .amount(savedSale.getTotalAmount())
+                .paymentMethod(request.getPaymentMethod())
+                .status(TransactionStatus.COMPLETED)
+                .transactionDate(OffsetDateTime.now())
+                .createdBy(currentUser)
+                .sale(savedSale)
+                .build();
+        transactionRepository.save(transaction);
+
+        return savedSale;
     }
 }

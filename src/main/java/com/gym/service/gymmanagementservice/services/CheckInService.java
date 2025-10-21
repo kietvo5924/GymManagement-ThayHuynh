@@ -1,7 +1,5 @@
 package com.gym.service.gymmanagementservice.services;
 
-package com.gym.service.gymmanagementservice.services;
-
 import com.gym.service.gymmanagementservice.dtos.CheckInRequestDTO;
 import com.gym.service.gymmanagementservice.dtos.CheckInResponseDTO;
 import com.gym.service.gymmanagementservice.models.*;

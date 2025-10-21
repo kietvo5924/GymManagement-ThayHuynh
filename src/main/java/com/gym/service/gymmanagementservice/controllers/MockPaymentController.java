@@ -1,5 +1,7 @@
 package com.gym.service.gymmanagementservice.controllers;
 
+import com.gym.service.gymmanagementservice.models.MemberPackage;
+import com.gym.service.gymmanagementservice.models.SubscriptionStatus;
 import com.gym.service.gymmanagementservice.models.Transaction;
 import com.gym.service.gymmanagementservice.models.TransactionStatus;
 import com.gym.service.gymmanagementservice.repositories.TransactionRepository;
@@ -8,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.OffsetDateTime;
 
 @RestController
 @RequiredArgsConstructor
@@ -60,10 +64,29 @@ public class MockPaymentController {
 
         if ("SUCCESS".equalsIgnoreCase(status)) {
             transaction.setStatus(TransactionStatus.COMPLETED);
+
+            // Kích hoạt gói tập liên quan
+            MemberPackage subscription = transaction.getMemberPackage();
+            if (subscription != null) {
+                subscription.setStatus(SubscriptionStatus.ACTIVE);
+                // Có thể cập nhật lại ngày bắt đầu/kết thúc tại đây nếu cần
+                subscription.setStartDate(OffsetDateTime.now());
+                subscription.setEndDate(OffsetDateTime.now().plusDays(subscription.getGymPackage().getDurationDays()));
+            }
+
+            // Lưu lại cả hai
             transactionRepository.save(transaction);
-            return ResponseEntity.ok("<h1>Thanh toán THÀNH CÔNG!</h1><p>Bạn có thể đóng trang này.</p>");
+
+            return ResponseEntity.ok("<h1>Thanh toán THÀNH CÔNG!</h1><p>Gói tập đã được kích hoạt. Bạn có thể đóng trang này.</p>");
         } else {
             transaction.setStatus(TransactionStatus.FAILED);
+
+            // Hủy gói đăng ký nếu thanh toán thất bại
+            MemberPackage subscription = transaction.getMemberPackage();
+            if (subscription != null) {
+                subscription.setStatus(SubscriptionStatus.CANCELLED);
+            }
+
             transactionRepository.save(transaction);
             return ResponseEntity.ok("<h1>Thanh toán THẤT BẠI!</h1><p>Bạn có thể đóng trang này.</p>");
         }

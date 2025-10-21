@@ -6,7 +6,7 @@ import com.gym.service.gymmanagementservice.dtos.SubscriptionResponseDTO;
 import com.gym.service.gymmanagementservice.models.*;
 import com.gym.service.gymmanagementservice.repositories.MemberPackageRepository;
 import com.gym.service.gymmanagementservice.repositories.MemberRepository;
-import com.gym.service.gymmanagementservice.repositories.PackageRepository;
+import com.gym.service.gymmanagementservice.repositories.GymPackageRepository;
 import com.gym.service.gymmanagementservice.repositories.TransactionRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class SubscriptionService {
 
     private final MemberRepository memberRepository;
-    private final PackageRepository gymPackageRepository;
+    private final GymPackageRepository gymPackageRepository;
     private final MemberPackageRepository memberPackageRepository;
     private final AuthenticationService authenticationService;
     private final TransactionRepository transactionRepository;
@@ -151,19 +151,28 @@ public class SubscriptionService {
         GymPackage gymPackage = gymPackageRepository.findById(request.getPackageId())
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy gói tập..."));
 
-        // Tạo Transaction với status PENDING
+        // Tạo gói đăng ký với trạng thái PENDING
+        MemberPackage subscription = MemberPackage.builder()
+                .member(member)
+                .gymPackage(gymPackage)
+                .startDate(OffsetDateTime.now())
+                .endDate(OffsetDateTime.now().plusDays(gymPackage.getDurationDays()))
+                .status(SubscriptionStatus.PENDING)
+                .build();
+        MemberPackage pendingSubscription = memberPackageRepository.save(subscription);
+
+        // Tạo Transaction với status PENDING và LIÊN KẾT với gói đăng ký
         Transaction transaction = Transaction.builder()
                 .amount(gymPackage.getPrice())
                 .paymentMethod(request.getPaymentMethod())
                 .status(TransactionStatus.PENDING)
                 .transactionDate(OffsetDateTime.now())
                 .createdBy(currentUser)
+                .memberPackage(pendingSubscription)
                 .build();
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        // Tạo link tới trang thanh toán giả, truyền vào ID của transaction
-        String paymentUrl = "http://localhost:8080/api/mock-payment/pay/" + savedTransaction.getId();
-
-        return paymentUrl;
+        // Tạo link thanh toán
+        return "http://localhost:8080/api/mock-payment/pay/" + savedTransaction.getId();
     }
 }

@@ -8,6 +8,6 @@ import java.util.Optional;
 
 @Repository
 
-public interface PackageRepository extends JpaRepository<GymPackage, Long> {
+public interface GymPackageRepository extends JpaRepository<GymPackage, Long> {
     Optional<GymPackage> findByName(String name);
 }
