@@ -39,6 +39,10 @@ public class Sale {
     @Column(name = "sale_date", nullable = false)
     private OffsetDateTime saleDate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private SaleStatus status;
+
     // Một hóa đơn có nhiều dòng sản phẩm
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SaleDetail> saleDetails = new ArrayList<>();

@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .securityMatcher("/api/**")
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/auth/verify**", "/api/public/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/auth/verify**", "/api/public/**", "/api/vnpay/ipn", "/api/vnpay/return").permitAll()
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 

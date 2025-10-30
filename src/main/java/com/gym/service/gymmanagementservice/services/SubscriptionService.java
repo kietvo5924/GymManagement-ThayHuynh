@@ -141,38 +141,4 @@ public class SubscriptionService {
         MemberPackage updatedSubscription = memberPackageRepository.save(subscription);
         return SubscriptionResponseDTO.fromMemberPackage(updatedSubscription);
     }
-
-    @Transactional
-    public String createMockPaymentRequest(SubscriptionRequestDTO request) {
-        User currentUser = authenticationService.getCurrentAuthenticatedUser();
-        Member member = memberRepository.findById(request.getMemberId())
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy hội viên..."));
-
-        GymPackage gymPackage = gymPackageRepository.findById(request.getPackageId())
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy gói tập..."));
-
-        // Tạo gói đăng ký với trạng thái PENDING
-        MemberPackage subscription = MemberPackage.builder()
-                .member(member)
-                .gymPackage(gymPackage)
-                .startDate(OffsetDateTime.now())
-                .endDate(OffsetDateTime.now().plusDays(gymPackage.getDurationDays()))
-                .status(SubscriptionStatus.PENDING)
-                .build();
-        MemberPackage pendingSubscription = memberPackageRepository.save(subscription);
-
-        // Tạo Transaction với status PENDING và LIÊN KẾT với gói đăng ký
-        Transaction transaction = Transaction.builder()
-                .amount(gymPackage.getPrice())
-                .paymentMethod(request.getPaymentMethod())
-                .status(TransactionStatus.PENDING)
-                .transactionDate(OffsetDateTime.now())
-                .createdBy(currentUser)
-                .memberPackage(pendingSubscription)
-                .build();
-        Transaction savedTransaction = transactionRepository.save(transaction);
-
-        // Tạo link thanh toán
-        return "http://localhost:8080/api/mock-payment/pay/" + savedTransaction.getId();
-    }
 }
