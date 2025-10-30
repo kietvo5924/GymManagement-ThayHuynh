@@ -50,9 +50,16 @@ public class SecurityConfig {
                         // Các trang yêu cầu quyền cụ thể
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
+                        .requestMatchers("/members/**").hasAnyRole("ADMIN", "STAFF")
+
+                        .requestMatchers("/check-in/**").hasAnyRole("ADMIN", "STAFF")
+
+                        .requestMatchers("/pos/**").hasAnyRole("ADMIN", "STAFF")
+
                         // Các trang và tài nguyên công khai
                         .requestMatchers(
                                 "/login",
+                                "/signup",
                                 "/error",
                                 "/css/**",
                                 "/js/**",

@@ -28,13 +28,20 @@ public class MemberPackage {
     @JoinColumn(name = "package_id", nullable = false)
     private GymPackage gymPackage;
 
-    @Column(name = "start_date", nullable = false)
+    @Column(name = "start_date")
     private OffsetDateTime startDate;
 
-    @Column(name = "end_date", nullable = false)
+    @Column(name = "end_date")
     private OffsetDateTime endDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private SubscriptionStatus status;
+
+    @Column(name = "remaining_sessions")
+    private Integer remainingSessions;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_pt_id")
+    private User assignedPt; // PT được gán cho gói này
 }

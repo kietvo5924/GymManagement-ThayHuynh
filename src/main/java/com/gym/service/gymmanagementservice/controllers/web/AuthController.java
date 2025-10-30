@@ -40,12 +40,13 @@ public class AuthController {
         }
 
         try {
-            authenticationService.signup(request);
+            authenticationService.signupWeb(request);
+
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.");
+                    "Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.");
             return "redirect:/login";
         } catch (Exception e) {
-            bindingResult.rejectValue("email", "error.signUpRequest", e.getMessage());
+            bindingResult.rejectValue("phoneNumber", "error.signUpRequest", e.getMessage());
             return "signup";
         }
     }

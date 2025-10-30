@@ -1,8 +1,6 @@
 package com.gym.service.gymmanagementservice.controllers;
 
-import com.gym.service.gymmanagementservice.dtos.JwtAuthenticationResponse;
-import com.gym.service.gymmanagementservice.dtos.SignInRequest;
-import com.gym.service.gymmanagementservice.dtos.SignUpRequest;
+import com.gym.service.gymmanagementservice.dtos.*;
 import com.gym.service.gymmanagementservice.services.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,22 +19,34 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
-    @Operation(summary = "Đăng ký tài khoản mới", description = "API cho phép người dùng mới đăng ký. Tài khoản sau khi tạo sẽ chưa được kích hoạt và cần xác thực qua email.")
+    @Operation(summary = "Đăng ký tài khoản mới bằng SĐT", description = "API cho phép người dùng mới đăng ký. Tài khoản sẽ cần xác thực qua OTP.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Đăng ký thành công, yêu cầu kiểm tra email"),
-            @ApiResponse(responseCode = "400", description = "Dữ liệu không hợp lệ hoặc Email đã tồn tại")
+            @ApiResponse(responseCode = "200", description = "Đăng ký thành công, chờ xác thực OTP. (Trả về OTP mô phỏng)"),
+            @ApiResponse(responseCode = "400", description = "Dữ liệu không hợp lệ hoặc SĐT/Email đã tồn tại")
     })
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@Valid @RequestBody SignUpRequest request) {
-        String message = authenticationService.signup(request);
-        return ResponseEntity.ok(message);
+    public ResponseEntity<SignUpResponse> signup(@Valid @RequestBody SignUpRequest request) {
+        SignUpResponse response = authenticationService.signup(request);
+        return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Đăng nhập vào hệ thống", description = "Cung cấp email và mật khẩu để nhận về JWT token.")
+    // --- HÀM MỚI: Đăng ký cho Hội viên ---
+    @Operation(summary = "Đăng ký tài khoản HỘI VIÊN (MEMBER) mới", description = "Dành cho hội viên tự đăng ký trên app di động.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Đăng ký thành công, chờ xác thực OTP."),
+            @ApiResponse(responseCode = "400", description = "SĐT đã tồn tại")
+    })
+    @PostMapping("/member-signup")
+    public ResponseEntity<SignUpResponse> memberSignup(@Valid @RequestBody MemberSignUpRequest request) {
+        SignUpResponse response = authenticationService.memberSignup(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Đăng nhập vào hệ thống bằng SĐT", description = "Cung cấp SĐT và mật khẩu để nhận về JWT token.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Đăng nhập thành công, trả về token"),
             @ApiResponse(responseCode = "400", description = "Dữ liệu không hợp lệ"),
-            @ApiResponse(responseCode = "403", description = "Sai email/mật khẩu hoặc tài khoản chưa được kích hoạt/bị khóa")
+            @ApiResponse(responseCode = "403", description = "Sai SĐT/mật khẩu hoặc tài khoản chưa được kích hoạt/bị khóa")
     })
     @PostMapping("/signin")
     public ResponseEntity<JwtAuthenticationResponse> signin(@Valid @RequestBody SignInRequest request) {
@@ -44,15 +54,15 @@ public class AuthenticationController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Xác thực tài khoản qua email", description = "Người dùng sẽ được điều hướng đến đây từ link trong email để kích hoạt tài khoản.")
+    @Operation(summary = "Xác thực tài khoản bằng OTP", description = "Người dùng gửi SĐT và OTP để kích hoạt tài khoản.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Xác thực thành công"),
-            @ApiResponse(responseCode = "400", description = "Token không hợp lệ hoặc đã hết hạn")
+            @ApiResponse(responseCode = "400", description = "OTP không hợp lệ, hết hạn hoặc SĐT không tồn tại")
     })
-    @GetMapping("/verify")
-    public ResponseEntity<String> verifyAccount(@RequestParam("token") String token) {
+    @PostMapping("/verify-otp")
+    public ResponseEntity<String> verifyAccount(@Valid @RequestBody VerifyOtpRequest request) {
         try {
-            String message = authenticationService.verifyAccount(token);
+            String message = authenticationService.verifyOtp(request);
             return ResponseEntity.ok(message);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

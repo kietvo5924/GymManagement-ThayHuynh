@@ -26,7 +26,8 @@ public class PaymentService {
     private final GymPackageRepository gymPackageRepository;
     private final SaleRepository saleRepository;
     private final VNPayConfig vnPayConfig;
-    private final AuthenticationService authenticationService; // Để lấy user hiện tại
+    private final AuthenticationService authenticationService;
+    private final SaleService saleService;
 
     @Transactional
     public String createSubscriptionPaymentUrl(HttpServletRequest req, Long memberId, Long packageId) {
@@ -40,20 +41,20 @@ public class PaymentService {
         MemberPackage subscription = MemberPackage.builder()
                 .member(member)
                 .gymPackage(gymPackage)
-                .startDate(null) // Sẽ cập nhật sau khi thanh toán thành công
-                .endDate(null)   // Sẽ cập nhật sau khi thanh toán thành công
+                .startDate(null)
+                .endDate(null)
                 .status(SubscriptionStatus.PENDING)
                 .build();
         MemberPackage pendingSubscription = memberPackageRepository.save(subscription);
 
-        // 2. Tạo Transaction với status PENDING, liên kết với MemberPackage
+        // 2. Tạo Transaction với status PENDING
         Transaction transaction = Transaction.builder()
                 .amount(gymPackage.getPrice())
-                .paymentMethod(PaymentMethod.BANK_TRANSFER) // Hoặc lấy từ request nếu có nhiều lựa chọn
+                .paymentMethod(PaymentMethod.BANK_TRANSFER) // Mặc định cho VNPay
                 .status(TransactionStatus.PENDING)
                 .transactionDate(OffsetDateTime.now())
                 .createdBy(currentUser)
-                .memberPackage(pendingSubscription) // Liên kết transaction với subscription
+                .memberPackage(pendingSubscription)
                 .build();
         Transaction savedTransaction = transactionRepository.save(transaction);
 
@@ -68,12 +69,14 @@ public class PaymentService {
         Sale sale = saleRepository.findById(saleId)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy hóa đơn bán hàng ID: " + saleId));
 
-        // Kiểm tra xem Sale này đã có Transaction chưa hoặc đã thanh toán chưa
-        // (Bạn có thể thêm logic này nếu cần)
+        // Kiểm tra Sale phải ở trạng thái PENDING_PAYMENT
+        if (sale.getStatus() != SaleStatus.PENDING_PAYMENT) {
+            throw new IllegalStateException("Hóa đơn này không ở trạng thái chờ thanh toán.");
+        }
 
         Transaction transaction = Transaction.builder()
                 .amount(sale.getTotalAmount())
-                .paymentMethod(PaymentMethod.BANK_TRANSFER)
+                .paymentMethod(PaymentMethod.BANK_TRANSFER) // Mặc định cho VNPay
                 .status(TransactionStatus.PENDING)
                 .transactionDate(OffsetDateTime.now())
                 .createdBy(currentUser)
@@ -82,9 +85,7 @@ public class PaymentService {
                 .build();
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        // Cập nhật trạng thái Sale thành chờ thanh toán
-        sale.setStatus(SaleStatus.PENDING_PAYMENT); // <-- Set trạng thái cho Sale
-        saleRepository.save(sale);                  // <-- Lưu lại Sale
+        // (Không cần cập nhật Sale status vì nó đã là PENDING_PAYMENT từ SaleService)
 
         String orderInfo = "Thanh toan hoa don san pham #" + sale.getId();
         return VNPayUtil.createPaymentUrl(req, vnPayConfig, savedTransaction.getId(), savedTransaction.getAmount());
@@ -102,7 +103,6 @@ public class PaymentService {
 
         String transactionIdStr = params.get("vnp_TxnRef")[0];
         String responseCode = params.get("vnp_ResponseCode")[0];
-        // String amountStr = params.get("vnp_Amount")[0];
 
         Long transactionId = Long.parseLong(transactionIdStr);
         Optional<Transaction> transactionOpt = transactionRepository.findById(transactionId);
@@ -119,9 +119,6 @@ public class PaymentService {
             return true;
         }
 
-        // BigDecimal vnpAmount = new BigDecimal(amountStr).divide(new BigDecimal(100));
-        // if (transaction.getAmount().compareTo(vnpAmount) != 0) { ... } // Kiểm tra số tiền
-
         if ("00".equals(responseCode)) {
             // Thanh toán thành công
             transaction.setStatus(TransactionStatus.COMPLETED);
@@ -131,18 +128,36 @@ public class PaymentService {
             MemberPackage subscription = transaction.getMemberPackage();
             if (subscription != null && subscription.getStatus() == SubscriptionStatus.PENDING) {
                 subscription.setStatus(SubscriptionStatus.ACTIVE);
-                subscription.setStartDate(OffsetDateTime.now());
-                subscription.setEndDate(OffsetDateTime.now().plusDays(subscription.getGymPackage().getDurationDays()));
+
+                // Cập nhật ngày bắt đầu/kết thúc dựa trên loại gói
+                if(subscription.getGymPackage().getPackageType() == PackageType.GYM_ACCESS || subscription.getGymPackage().getPackageType() == PackageType.PER_VISIT) {
+                    OffsetDateTime startDate = OffsetDateTime.now();
+                    OffsetDateTime endDate = startDate.plusDays(subscription.getGymPackage().getDurationDays());
+                    subscription.setStartDate(startDate);
+                    subscription.setEndDate(endDate);
+                }
+                // (Gói PT không cần ngày bắt đầu/kết thúc)
+
                 memberPackageRepository.save(subscription);
                 log.info("Activated MemberPackage {} for Transaction {}.", subscription.getId(), transactionId);
             }
 
             // Xử lý Hóa đơn bán hàng
             Sale sale = transaction.getSale();
-            if (sale != null && sale.getStatus() == SaleStatus.PENDING_PAYMENT) { // Chỉ cập nhật nếu đang chờ
-                sale.setStatus(SaleStatus.PAID); // <-- Cập nhật Sale thành Đã thanh toán
-                saleRepository.save(sale);       // <-- Lưu lại Sale
+            if (sale != null && sale.getStatus() == SaleStatus.PENDING_PAYMENT) {
+                sale.setStatus(SaleStatus.PAID);
+                saleRepository.save(sale);
                 log.info("Updated Sale {} to PAID for Transaction {}.", sale.getId(), transactionId);
+
+                // *** MỚI: TRỪ TỒN KHO KHI THANH TOÁN THÀNH CÔNG ***
+                try {
+                    saleService.deductStockForSale(sale);
+                    log.info("Deducted stock for Sale ID: {}", sale.getId());
+                } catch (IllegalStateException e) {
+                    log.error("!!! CRITICAL: Payment Success but FAILED to deduct stock for Sale ID: {}", sale.getId(), e);
+                    // (Bạn có thể thêm logic thông báo cho admin ở đây)
+                    // Vẫn trả về 'true' vì tiền đã nhận
+                }
             }
 
         } else {
@@ -161,10 +176,10 @@ public class PaymentService {
             // Xử lý Hóa đơn bán hàng
             Sale sale = transaction.getSale();
             if (sale != null && sale.getStatus() == SaleStatus.PENDING_PAYMENT) {
-                sale.setStatus(SaleStatus.PAYMENT_FAILED); // <-- Cập nhật Sale thành Thanh toán thất bại
-                saleRepository.save(sale);                 // <-- Lưu lại Sale
+                sale.setStatus(SaleStatus.PAYMENT_FAILED);
+                saleRepository.save(sale);
                 log.warn("Updated Sale {} to PAYMENT_FAILED for Transaction {}.", sale.getId(), transactionId);
-                // Có thể thêm logic hoàn trả tồn kho nếu cần
+                // Không cần hoàn trả tồn kho, vì chúng ta chưa bao giờ trừ nó
             }
         }
 

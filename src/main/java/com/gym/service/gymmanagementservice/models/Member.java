@@ -1,5 +1,6 @@
 package com.gym.service.gymmanagementservice.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,6 +40,11 @@ public class Member {
     // Mã vạch để quét khi check-in, CẦN LÀ DUY NHẤT
     @Column(name = "barcode", length = 50, nullable = false, unique = true)
     private String barcode;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_account_id", unique = true) // Sẽ tạo cột user_account_id
+    @JsonBackReference // Giúp tránh lỗi đệ quy
+    private User userAccount;
 
     @Column(name = "created_at")
     private OffsetDateTime createdAt;

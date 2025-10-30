@@ -1,5 +1,6 @@
 package com.gym.service.gymmanagementservice.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,10 +29,10 @@ public class User implements UserDetails {
     @Column(name = "fullname", length = 100)
     private String fullName;
 
-    @Column(name = "phone_number", length = 10, nullable = false)
+    @Column(name = "phone_number", length = 10, nullable = false, unique = true)
     private String phoneNumber;
 
-    @Column(name = "email", length = 100, nullable = false, unique = true)
+    @Column(name = "email", length = 100, unique = true)
     private String email;
 
     @Column(name = "password", length = 200, nullable = false)
@@ -46,6 +47,16 @@ public class User implements UserDetails {
 
     @Column(nullable = false)
     private boolean locked = false;
+
+    @Column(name = "verification_code", length = 6)
+    private String verificationCode;
+
+    @Column(name = "verification_code_expiry")
+    private OffsetDateTime verificationCodeExpiry;
+
+    @OneToOne(mappedBy = "userAccount", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private Member memberProfile;
 
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
@@ -70,7 +81,9 @@ public class User implements UserDetails {
     }
 
     @Override
-    public String getUsername() {return email;}
+    public String getUsername() {
+        return phoneNumber;
+    }
 
     @Override
     public boolean isAccountNonExpired() {return true;}

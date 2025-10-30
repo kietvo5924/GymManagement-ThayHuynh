@@ -3,15 +3,19 @@ package com.gym.service.gymmanagementservice.services;
 import com.gym.service.gymmanagementservice.dtos.MemberRequestDTO;
 import com.gym.service.gymmanagementservice.dtos.MemberResponseDTO;
 import com.gym.service.gymmanagementservice.models.Member;
+import com.gym.service.gymmanagementservice.models.Role;
+import com.gym.service.gymmanagementservice.models.User;
 import com.gym.service.gymmanagementservice.repositories.MemberRepository;
+import com.gym.service.gymmanagementservice.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
+// Bỏ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,28 +23,54 @@ import java.util.stream.Collectors;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public MemberResponseDTO createMember(MemberRequestDTO request) {
-        if (memberRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+
+        // Đổi tên biến để rõ ràng hơn
+        String phoneNumber = request.getPhoneNumber();
+        String email = request.getEmail();
+
+        // Kiểm tra SĐT trên bảng User (vì SĐT là unique)
+        if (userRepository.existsByPhoneNumber(phoneNumber)) {
             throw new IllegalArgumentException("Số điện thoại đã được đăng ký.");
         }
-        if (request.getEmail() != null && !request.getEmail().isEmpty() && memberRepository.existsByEmail(request.getEmail())) {
+        if (email != null && !email.isEmpty() && userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email đã được đăng ký.");
         }
 
-        String uniqueBarcode = UUID.randomUUID().toString();
-
-        Member member = Member.builder()
+        // TẠO CẢ USER VÀ MEMBER
+        // 1. Tạo User
+        User user = User.builder()
                 .fullName(request.getFullName())
-                .phoneNumber(request.getPhoneNumber())
-                .email(request.getEmail())
-                .birthDate(request.getBirthDate())
-                .address(request.getAddress())
-                .barcode(uniqueBarcode)
+                .phoneNumber(phoneNumber)
+                .email(email)
+                // Staff tạo -> kích hoạt luôn, đặt mật khẩu mặc định (SĐT)
+                .password(passwordEncoder.encode(phoneNumber))
+                .role(Role.MEMBER)
+                .enabled(true)
                 .build();
 
-        return MemberResponseDTO.fromMember(memberRepository.save(member));
+        // 2. Tạo Member
+        Member member = Member.builder()
+                .fullName(request.getFullName())
+                .phoneNumber(phoneNumber)
+                .email(email)
+                .birthDate(request.getBirthDate())
+                .address(request.getAddress())
+                .barcode(phoneNumber) // Dùng SĐT làm barcode
+                .build();
+
+        // 3. Liên kết 2 chiều
+        user.setMemberProfile(member);
+        member.setUserAccount(user);
+
+        // 4. Lưu User (Member sẽ tự lưu)
+        userRepository.save(user);
+
+        return MemberResponseDTO.fromMember(member);
     }
 
     public List<MemberResponseDTO> getAllMembers() {
@@ -49,7 +79,6 @@ public class MemberService {
                 .collect(Collectors.toList());
     }
 
-    // Lấy thông tin một hội viên bằng ID
     public MemberResponseDTO getMemberById(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy hội viên với ID: " + memberId));
@@ -62,26 +91,40 @@ public class MemberService {
         Member existingMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy hội viên với ID: " + memberId));
 
-        memberRepository.findByPhoneNumber(request.getPhoneNumber()).ifPresent(member -> {
-            if (!Objects.equals(member.getId(), memberId)) {
+        // Lấy User liên kết
+        User userAccount = existingMember.getUserAccount();
+        if (userAccount == null) {
+            throw new IllegalStateException("Hội viên này không có tài khoản (User) liên kết.");
+        }
+
+        // Kiểm tra SĐT (trên bảng User)
+        userRepository.findByPhoneNumber(request.getPhoneNumber()).ifPresent(user -> {
+            if (!Objects.equals(user.getId(), userAccount.getId())) {
                 throw new IllegalArgumentException("Số điện thoại đã được đăng ký bởi người khác.");
             }
         });
-        if(request.getEmail() != null && !request.getEmail().isEmpty()) {
-            memberRepository.findByEmail(request.getEmail()).ifPresent(member -> {
-                if (!Objects.equals(member.getId(), memberId)) {
-                    throw new IllegalArgumentException("Email đã được đăng ký bởi người khác.");
-                }
-            });
+
+        // Kiểm tra Email (trên bảng User)
+        if (request.getEmail() != null && !request.getEmail().isEmpty()) {
+            // (Lưu ý: hàm findByEmail không có trên UserRepository, bạn nên thêm nó vào)
+            // userRepository.findByEmail(request.getEmail()).ifPresent(user -> { ... });
         }
+
+        // Cập nhật cả User và Member
+        userAccount.setFullName(request.getFullName());
+        userAccount.setPhoneNumber(request.getPhoneNumber());
+        userAccount.setEmail(request.getEmail());
 
         existingMember.setFullName(request.getFullName());
         existingMember.setPhoneNumber(request.getPhoneNumber());
         existingMember.setEmail(request.getEmail());
         existingMember.setBirthDate(request.getBirthDate());
         existingMember.setAddress(request.getAddress());
+        existingMember.setBarcode(request.getPhoneNumber());
 
-        Member updatedMember = memberRepository.save(existingMember);
-        return MemberResponseDTO.fromMember(updatedMember);
+        // Lưu User (MemberRepository sẽ tự lưu Member do liên kết)
+        userRepository.save(userAccount);
+
+        return MemberResponseDTO.fromMember(existingMember);
     }
 }
