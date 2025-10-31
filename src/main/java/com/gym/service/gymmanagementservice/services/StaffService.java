@@ -62,4 +62,21 @@ public class StaffService {
                 .map(UserResponseDTO::fromUser)
                 .collect(Collectors.toList());
     }
+
+    /**
+     * MỚI: Khóa hoặc Mở khóa tài khoản nhân viên
+     */
+    @Transactional
+    public void toggleUserLockStatus(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng với ID: " + userId));
+
+        // Không cho phép khóa/mở khóa HỘI VIÊN từ đây
+        if (user.getRole() == com.gym.service.gymmanagementservice.models.Role.MEMBER) {
+            throw new IllegalArgumentException("Không thể quản lý trạng thái tài khoản HỘI VIÊN tại đây.");
+        }
+
+        user.setLocked(!user.isLocked()); // Đảo ngược trạng thái khóa
+        userRepository.save(user);
+    }
 }

@@ -36,21 +36,22 @@
         <li class="nav-item px-3 py-2 text-muted text-uppercase small" style="font-size: .75rem;">
             Nghiệp vụ
         </li>
+
         <li class="nav-item">
             <a class="nav-link" th:href="@{/check-in}"
-               th:classappend="${#httpServletRequest.requestURI.startsWith('/check-in')} ? 'active' : ''">
+               th:classappend="${activePage == 'checkIn'} ? 'active' : ''">
                 Check-in (Quầy)
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link" th:href="@{/members}"
-               th:classappend="${#httpServletRequest.requestURI.startsWith('/members')} ? 'active' : ''">
+               th:classappend="${activePage == 'members'} ? 'active' : ''">
                 Quản lý Hội viên
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link" th:href="@{/pos}"
-               th:classappend="${#httpServletRequest.requestURI.startsWith('/pos')} ? 'active' : ''">
+               th:classappend="${activePage == 'pos'} ? 'active' : ''">
                 Bán hàng (POS)
             </a>
         </li>
@@ -61,25 +62,25 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link" th:href="@{/admin/users}"
-                   th:classappend="${#httpServletRequest.requestURI.startsWith('/admin/users')} ? 'active' : ''">
+                   th:classappend="${activePage == 'adminUsers'} ? 'active' : ''">
                     Quản lý Nhân viên
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" th:href="@{/admin/packages}"
-                   th:classappend="${#httpServletRequest.requestURI.startsWith('/admin/packages')} ? 'active' : ''">
+                   th:classappend="${activePage == 'adminPackages'} ? 'active' : ''">
                     Quản lý Gói tập
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" th:href="@{/admin/products}"
-                   th:classappend="${#httpServletRequest.requestURI.startsWith('/admin/products')} ? 'active' : ''">
+                   th:classappend="${activePage == 'adminProducts'} ? 'active' : ''">
                     Quản lý Sản phẩm
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" th:href="@{/admin/schedules}"
-                   th:classappend="${#httpServletRequest.requestURI.startsWith('/admin/schedules')} ? 'active' : ''">
+                   th:classappend="${activePage == 'adminSchedules'} ? 'active' : ''">
                     Quản lý Lịch làm việc
                 </a>
             </li>

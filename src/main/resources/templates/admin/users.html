@@ -6,7 +6,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">Quản lý Nhân viên & PT</h2>
-        <button class="btn btn-primary">Thêm Nhân viên mới</button>
+        <a th:href="@{/admin/users/create}" class="btn btn-primary">Thêm Nhân viên mới</a>
     </div>
 
     <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
@@ -54,6 +54,24 @@
                            class="btn btn-sm btn-outline-primary">
                             Sửa
                         </a>
+
+                        <form th:if="${user.role.name() != 'MEMBER'}"
+                              th:action="@{/admin/users/toggle-lock/{id}(id=${user.id})}"
+                              method="post"
+                              class="d-inline ms-1">
+
+                            <button th:if="${!user.locked}"
+                                    type="submit" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Bạn có chắc muốn KHÓA tài khoản này?');">
+                                Khóa
+                            </button>
+
+                            <button th:if="${user.locked}"
+                                    type="submit" class="btn btn-sm btn-outline-success"
+                                    onclick="return confirm('Bạn có chắc muốn MỞ KHÓA tài khoản này?');">
+                                Mở khóa
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 </tbody>

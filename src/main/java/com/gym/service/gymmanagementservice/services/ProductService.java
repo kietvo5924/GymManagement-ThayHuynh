@@ -30,15 +30,32 @@ public class ProductService {
         return productRepository.findAll();
     }
 
+    /**
+     * MỚI: Lấy thông tin 1 sản phẩm
+     */
+    public Product getProductById(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sản phẩm với ID: " + productId));
+    }
+
     @Transactional
     public Product updateProduct(Long productId, ProductRequestDTO request) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sản phẩm với ID: " + productId));
+        Product product = getProductById(productId); // Sửa: Dùng hàm getProductById
 
         product.setName(request.getName());
         product.setPrice(request.getPrice());
         product.setStockQuantity(request.getStockQuantity());
 
         return productRepository.save(product);
+    }
+
+    /**
+     * MỚI: Ẩn hoặc Hiện sản phẩm (Ngừng bán / Bán lại)
+     */
+    @Transactional
+    public void toggleProductStatus(Long productId) {
+        Product product = getProductById(productId);
+        product.setActive(!product.isActive()); // Đảo ngược trạng thái
+        productRepository.save(product);
     }
 }

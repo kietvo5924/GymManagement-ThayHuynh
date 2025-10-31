@@ -58,7 +58,7 @@ public class AuthenticationService {
                 .phoneNumber(request.getPhoneNumber())
                 .email(request.getEmail()) // Lưu email (nếu có)
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.ADMIN)
+                .role(Role.STAFF)
                 .enabled(false)
                 .verificationCode(otp)
                 .verificationCodeExpiry(otpExpiry)
@@ -124,6 +124,39 @@ public class AuthenticationService {
                 .message("Đăng ký hội viên thành công! Vui lòng xác thực OTP.")
                 .otpForDemo(otp)
                 .build();
+    }
+
+    /**
+     * MỚI: Hàm Admin dùng để tạo tài khoản Staff/PT/Admin
+     * Kích hoạt ngay lập tức.
+     */
+    @Transactional
+    public void createStaffAccount(AdminCreateUserRequestDTO request) {
+        if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new IllegalArgumentException("Số điện thoại đã tồn tại.");
+        }
+        if (request.getEmail() != null && !request.getEmail().isEmpty() && userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Email đã tồn tại.");
+        }
+
+        // Không cho phép tạo Role MEMBER ở đây
+        if (request.getRole() == Role.MEMBER) {
+            throw new IllegalArgumentException("Không thể tạo tài khoản MEMBER từ giao diện này.");
+        }
+
+        User user = User.builder()
+                .fullName(request.getFullName())
+                .phoneNumber(request.getPhoneNumber())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(request.getRole()) // Lấy Role từ DTO
+                .enabled(true) // Kích hoạt ngay
+                .verificationCode(null)
+                .verificationCodeExpiry(null)
+                .build();
+
+        userRepository.save(user);
+        log.info("Tài khoản nhân viên (SĐT: {}) đã được Admin tạo và kích hoạt.", request.getPhoneNumber());
     }
 
     /**
@@ -213,31 +246,5 @@ public class AuthenticationService {
         String phoneNumber = SecurityContextHolder.getContext().getAuthentication().getName(); // Đây là SĐT
         return userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng."));
-    }
-
-    @Transactional
-    public void signupWeb(SignUpRequest request) {
-        if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
-            throw new IllegalArgumentException("Số điện thoại đã tồn tại.");
-        }
-        if (request.getEmail() != null && !request.getEmail().isEmpty() && userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email đã tồn tại.");
-        }
-
-        User user = User.builder()
-                .fullName(request.getFullName())
-                .phoneNumber(request.getPhoneNumber())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.STAFF)
-                .enabled(true)
-                .verificationCode(null)
-                .verificationCodeExpiry(null)
-                .build();
-
-        userRepository.save(user);
-
-        // Không cần gửi email hay trả về OTP
-        log.info("Tài khoản web (SĐT: {}) đã được tạo và kích hoạt.", request.getPhoneNumber());
     }
 }
