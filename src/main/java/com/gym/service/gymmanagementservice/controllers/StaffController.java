@@ -24,16 +24,16 @@ public class StaffController {
 
     private final StaffService staffService;
 
-    @GetMapping
-    @Operation(summary = "Lấy danh sách tất cả người dùng (Chỉ Admin)")
-    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
-        return ResponseEntity.ok(staffService.getAllUsers());
-    }
-
-    @PutMapping("/{userId}")
-    @Operation(summary = "Admin cập nhật thông tin của một người dùng (Chỉ Admin)")
-    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long userId, @Valid @RequestBody AdminUpdateUserRequestDTO request) {
-        UserResponseDTO updatedUser = staffService.updateUserByAdmin(userId, request);
-        return ResponseEntity.ok(updatedUser);
-    }
+//    @GetMapping
+//    @Operation(summary = "Lấy danh sách tất cả người dùng (Chỉ Admin)")
+//    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+//        return ResponseEntity.ok(staffService.getAllUsers());
+//    }
+//
+//    @PutMapping("/{userId}")
+//    @Operation(summary = "Admin cập nhật thông tin của một người dùng (Chỉ Admin)")
+//    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long userId, @Valid @RequestBody AdminUpdateUserRequestDTO request) {
+//        UserResponseDTO updatedUser = staffService.updateUserByAdmin(userId, request);
+//        return ResponseEntity.ok(updatedUser);
+//    }
 }

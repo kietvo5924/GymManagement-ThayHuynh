@@ -25,14 +25,14 @@ public class GymPackageController {
 
     private final PackageService packageService;
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Tạo một gói tập mới (Chỉ Admin)")
-    @ApiResponse(responseCode = "201", description = "Tạo gói tập thành công")
-    public ResponseEntity<PackageResponseDTO> createPackage(@Valid @RequestBody PackageRequestDTO request) {
-        PackageResponseDTO newPackage = packageService.createPackage(request);
-        return new ResponseEntity<>(newPackage, HttpStatus.CREATED);
-    }
+//    @PostMapping
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @Operation(summary = "Tạo một gói tập mới (Chỉ Admin)")
+//    @ApiResponse(responseCode = "201", description = "Tạo gói tập thành công")
+//    public ResponseEntity<PackageResponseDTO> createPackage(@Valid @RequestBody PackageRequestDTO request) {
+//        PackageResponseDTO newPackage = packageService.createPackage(request);
+//        return new ResponseEntity<>(newPackage, HttpStatus.CREATED);
+//    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
@@ -50,19 +50,19 @@ public class GymPackageController {
         return ResponseEntity.ok(pkg);
     }
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Cập nhật thông tin gói tập (Chỉ Admin)")
-    public ResponseEntity<PackageResponseDTO> updatePackage(@PathVariable Long id, @Valid @RequestBody PackageRequestDTO request) {
-        PackageResponseDTO updatedPackage = packageService.updatePackage(id, request);
-        return ResponseEntity.ok(updatedPackage);
-    }
+//    @PutMapping("/{id}")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @Operation(summary = "Cập nhật thông tin gói tập (Chỉ Admin)")
+//    public ResponseEntity<PackageResponseDTO> updatePackage(@PathVariable Long id, @Valid @RequestBody PackageRequestDTO request) {
+//        PackageResponseDTO updatedPackage = packageService.updatePackage(id, request);
+//        return ResponseEntity.ok(updatedPackage);
+//    }
 
-    @PatchMapping("/{id}/toggle-status")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Kích hoạt hoặc vô hiệu hóa một gói tập (Chỉ Admin)")
-    public ResponseEntity<Void> togglePackageStatus(@PathVariable Long id) {
-        packageService.togglePackageStatus(id);
-        return ResponseEntity.noContent().build();
-    }
+//    @PatchMapping("/{id}/toggle-status")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @Operation(summary = "Kích hoạt hoặc vô hiệu hóa một gói tập (Chỉ Admin)")
+//    public ResponseEntity<Void> togglePackageStatus(@PathVariable Long id) {
+//        packageService.togglePackageStatus(id);
+//        return ResponseEntity.noContent().build();
+//    }
 }

@@ -9,6 +9,7 @@ import com.gym.service.gymmanagementservice.models.PackageType;
 import com.gym.service.gymmanagementservice.models.Product;
 import com.gym.service.gymmanagementservice.models.Role;
 import com.gym.service.gymmanagementservice.services.*; // <-- SỬA IMPORT
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,13 +27,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/admin")
 @PreAuthorize("hasRole('ADMIN')")
+@Hidden
 public class AdminWebController {
 
     private final StaffService staffService;
     private final PackageService packageService;
     private final ProductService productService;
     private final WorkScheduleService workScheduleService;
-    private final AuthenticationService authenticationService; // <-- THÊM DỊCH VỤ CÒN THIẾU
+    private final AuthenticationService authenticationService;
+    private final ReportService reportService;
 
     // ... (Toàn bộ các hàm của User và Package giữ nguyên) ...
     @GetMapping("/users")
@@ -423,5 +426,24 @@ public class AdminWebController {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
         }
         return "redirect:/admin/schedules";
+    }
+
+    // --- CÁC HÀM XỬ LÝ BÁO CÁO (REPORTS) ---
+    @GetMapping("/reports/sales")
+    public String getSaleReportPage(Model model) {
+        List<com.gym.service.gymmanagementservice.dtos.TransactionReportDTO> reportData = reportService.getFullTransactionReport();
+
+        java.math.BigDecimal totalRevenue = reportData.stream()
+                .filter(tx -> tx.getStatus() == com.gym.service.gymmanagementservice.models.TransactionStatus.COMPLETED)
+                .map(com.gym.service.gymmanagementservice.dtos.TransactionReportDTO::getAmount)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+        model.addAttribute("reportData", reportData);
+        model.addAttribute("totalRevenue", totalRevenue);
+
+        model.addAttribute("pageTitle", "Báo cáo Doanh thu");
+        model.addAttribute("contentView", "admin/sales-report");
+        model.addAttribute("activePage", "adminReports");
+        return "fragments/layout";
     }
 }

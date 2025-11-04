@@ -3,6 +3,7 @@ package com.gym.service.gymmanagementservice.controllers.web;
 import com.gym.service.gymmanagementservice.dtos.*;
 import com.gym.service.gymmanagementservice.models.PackageType;
 import com.gym.service.gymmanagementservice.services.*;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/members")
 @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+@Hidden
 public class MemberWebController {
 
     private final MemberService memberService;

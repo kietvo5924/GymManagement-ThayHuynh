@@ -23,17 +23,17 @@ public class SaleController {
 
     private final SaleService saleService;
 
-    @PostMapping("/pos")
-    @Operation(summary = "Tạo hóa đơn bán tại quầy (POS) - (Đã thanh toán)")
-    public ResponseEntity<Sale> createPosSale(@Valid @RequestBody SaleRequestDTO request) {
-        Sale newSale = saleService.createPosSale(request);
-        return new ResponseEntity<>(newSale, HttpStatus.CREATED);
-    }
-
-    @PostMapping("/pending")
-    @Operation(summary = "Khởi tạo hóa đơn (chờ thanh toán online)")
-    public ResponseEntity<Sale> createPendingSale(@Valid @RequestBody SaleRequestDTO request) {
-        Sale pendingSale = saleService.createPendingSale(request);
-        return new ResponseEntity<>(pendingSale, HttpStatus.CREATED);
-    }
+//    @PostMapping("/pos")
+//    @Operation(summary = "Tạo hóa đơn bán tại quầy (POS) - (Đã thanh toán)")
+//    public ResponseEntity<Sale> createPosSale(@Valid @RequestBody SaleRequestDTO request) {
+//        Sale newSale = saleService.createPosSale(request);
+//        return new ResponseEntity<>(newSale, HttpStatus.CREATED);
+//    }
+//
+//    @PostMapping("/pending")
+//    @Operation(summary = "Khởi tạo hóa đơn (chờ thanh toán online)")
+//    public ResponseEntity<Sale> createPendingSale(@Valid @RequestBody SaleRequestDTO request) {
+//        Sale pendingSale = saleService.createPendingSale(request);
+//        return new ResponseEntity<>(pendingSale, HttpStatus.CREATED);
+//    }
 }

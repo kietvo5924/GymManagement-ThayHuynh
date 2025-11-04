@@ -4,6 +4,7 @@ import com.gym.service.gymmanagementservice.dtos.CheckInRequestDTO;
 import com.gym.service.gymmanagementservice.dtos.CheckInResponseDTO;
 import com.gym.service.gymmanagementservice.models.CheckInStatus;
 import com.gym.service.gymmanagementservice.services.CheckInService;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 @RequestMapping("/check-in")
 @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+@Hidden
 public class CheckInWebController {
 
     private final CheckInService checkInService;

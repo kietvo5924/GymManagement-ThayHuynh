@@ -1,10 +1,12 @@
 package com.gym.service.gymmanagementservice.controllers.web;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
+@Hidden
 public class DefaultController {
 
     @GetMapping("/default")

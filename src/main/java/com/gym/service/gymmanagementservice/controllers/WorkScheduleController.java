@@ -26,13 +26,13 @@ public class WorkScheduleController {
 
     private final WorkScheduleService workScheduleService;
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Tạo lịch làm việc mới cho nhân viên (Chỉ Admin)")
-    public ResponseEntity<WorkScheduleResponseDTO> createSchedule(@Valid @RequestBody WorkScheduleRequestDTO request) {
-        WorkScheduleResponseDTO newSchedule = workScheduleService.createSchedule(request);
-        return new ResponseEntity<>(newSchedule, HttpStatus.CREATED);
-    }
+//    @PostMapping
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @Operation(summary = "Tạo lịch làm việc mới cho nhân viên (Chỉ Admin)")
+//    public ResponseEntity<WorkScheduleResponseDTO> createSchedule(@Valid @RequestBody WorkScheduleRequestDTO request) {
+//        WorkScheduleResponseDTO newSchedule = workScheduleService.createSchedule(request);
+//        return new ResponseEntity<>(newSchedule, HttpStatus.CREATED);
+//    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'PT')")
@@ -44,11 +44,11 @@ public class WorkScheduleController {
         return ResponseEntity.ok(schedules);
     }
 
-    @DeleteMapping("/{scheduleId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Xóa một lịch làm việc (Chỉ Admin)")
-    public ResponseEntity<Void> deleteSchedule(@PathVariable Long scheduleId) {
-        workScheduleService.deleteSchedule(scheduleId);
-        return ResponseEntity.noContent().build();
-    }
+//    @DeleteMapping("/{scheduleId}")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @Operation(summary = "Xóa một lịch làm việc (Chỉ Admin)")
+//    public ResponseEntity<Void> deleteSchedule(@PathVariable Long scheduleId) {
+//        workScheduleService.deleteSchedule(scheduleId);
+//        return ResponseEntity.noContent().build();
+//    }
 }

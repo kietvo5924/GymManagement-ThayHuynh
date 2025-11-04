@@ -6,6 +6,7 @@ import com.gym.service.gymmanagementservice.models.Product;
 import com.gym.service.gymmanagementservice.services.MemberService;
 import com.gym.service.gymmanagementservice.services.ProductService;
 import com.gym.service.gymmanagementservice.services.SaleService;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/pos")
 @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+@Hidden
 public class SaleWebController {
 
     private final ProductService productService;

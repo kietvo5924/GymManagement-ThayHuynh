@@ -23,11 +23,11 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Product> createProduct(@Valid @RequestBody ProductRequestDTO request) {
-        return new ResponseEntity<>(productService.createProduct(request), HttpStatus.CREATED);
-    }
+//    @PostMapping
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public ResponseEntity<Product> createProduct(@Valid @RequestBody ProductRequestDTO request) {
+//        return new ResponseEntity<>(productService.createProduct(request), HttpStatus.CREATED);
+//    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
@@ -35,9 +35,9 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
-    @PutMapping("/{productId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long productId, @Valid @RequestBody ProductRequestDTO request) {
-        return ResponseEntity.ok(productService.updateProduct(productId, request));
-    }
+//    @PutMapping("/{productId}")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public ResponseEntity<Product> updateProduct(@PathVariable Long productId, @Valid @RequestBody ProductRequestDTO request) {
+//        return ResponseEntity.ok(productService.updateProduct(productId, request));
+//    }
 }

@@ -19,17 +19,6 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
-    @Operation(summary = "Đăng ký tài khoản mới bằng SĐT", description = "API cho phép người dùng mới đăng ký. Tài khoản sẽ cần xác thực qua OTP.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Đăng ký thành công, chờ xác thực OTP. (Trả về OTP mô phỏng)"),
-            @ApiResponse(responseCode = "400", description = "Dữ liệu không hợp lệ hoặc SĐT/Email đã tồn tại")
-    })
-    @PostMapping("/signup")
-    public ResponseEntity<SignUpResponse> signup(@Valid @RequestBody SignUpRequest request) {
-        SignUpResponse response = authenticationService.signup(request);
-        return ResponseEntity.ok(response);
-    }
-
     // --- HÀM MỚI: Đăng ký cho Hội viên ---
     @Operation(summary = "Đăng ký tài khoản HỘI VIÊN (MEMBER) mới", description = "Dành cho hội viên tự đăng ký trên app di động.")
     @ApiResponses(value = {
