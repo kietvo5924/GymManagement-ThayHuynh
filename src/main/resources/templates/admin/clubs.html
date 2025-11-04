@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::content}, 'Quản lý Chi nhánh')}">
+
+<div th:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Quản lý Chi nhánh (Clubs)</h2>
+        <a th:href="@{/admin/clubs/create}" class="btn btn-primary">Tạo Chi nhánh mới</a>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Tên Chi nhánh</th>
+                    <th scope="col">Địa chỉ</th>
+                    <th scope="col">Số điện thoại</th>
+                    <th scope="col">Trạng thái</th>
+                    <th scope="col" class="text-end">Hành động</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="club : ${clubs}">
+                    <th scope="row" th:text="${club.id}">1</th>
+                    <td th:text="${club.name}">CITIGYM Quận 1</td>
+                    <td th:text="${club.address}">123 Nguyễn Du</td>
+                    <td th:text="${club.phoneNumber}">0909123456</td>
+                    <td>
+                        <span th:if="${club.isActive}" class="badge bg-success">Đang hoạt động</span>
+                        <span th:if="${!club.isActive}" class="badge bg-danger">Đã đóng cửa</span>
+                    </td>
+                    <td class="text-end">
+                        <a th:href="@{/admin/clubs/edit/{id}(id=${club.id})}" class="btn btn-sm btn-outline-primary">Sửa</a>
+                        <form th:action="@{/admin/clubs/toggle/{id}(id=${club.id})}" method="post" class="d-inline ms-1">
+                            <button th:if="${club.isActive}" type="submit" class="btn btn-sm btn-outline-warning">Đóng cửa</button>
+                            <button th:if="${!club.isActive}" type="submit" class="btn btn-sm btn-outline-success">Mở lại</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</html>

@@ -40,8 +40,4 @@ public class MemberPackage {
 
     @Column(name = "remaining_sessions")
     private Integer remainingSessions;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assigned_pt_id")
-    private User assignedPt; // PT được gán cho gói này
 }

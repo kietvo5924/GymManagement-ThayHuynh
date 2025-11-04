@@ -1,5 +1,6 @@
 package com.gym.service.gymmanagementservice.dtos;
 
+import com.gym.service.gymmanagementservice.models.PackageAccessType; // <-- IMPORT MỚI
 import com.gym.service.gymmanagementservice.models.PackageType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
@@ -11,6 +12,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
+import java.util.Set; // <-- IMPORT MỚI
 
 @Data
 @Schema(description = "Đối tượng yêu cầu để tạo hoặc cập nhật gói tập")
@@ -47,4 +49,14 @@ public class PackageRequestDTO {
     @Schema(description = "Giờ check-in trễ nhất (định dạng HH:mm)", example = "16:00")
     @DateTimeFormat(iso = DateTimeFormat.ISO.TIME)
     private LocalTime endTimeLimit;
+
+    @Schema(description = "Loại quyền truy cập: SINGLE_CLUB (1 CLB) hoặc ALL_CLUBS (Tất cả CLB)")
+    @NotNull(message = "Quyền truy cập là bắt buộc")
+    private PackageAccessType accessType;
+
+    @Schema(description = "ID của Club. Bắt buộc nếu accessType = SINGLE_CLUB")
+    private Long targetClubId;
+
+    @Schema(description = "Danh sách các ID của tiện ích (Amenity) đi kèm")
+    private Set<Long> amenityIds;
 }

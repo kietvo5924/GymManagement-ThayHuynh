@@ -14,4 +14,7 @@ public interface WorkScheduleRepository extends JpaRepository<WorkSchedule, Long
 
     // Tìm tất cả lịch làm việc trong một khoảng thời gian
     List<WorkSchedule> findByStartTimeBetween(OffsetDateTime start, OffsetDateTime end);
+
+    boolean existsByUserIdAndStartTimeLessThanEqualAndEndTimeGreaterThanEqual(
+            Long userId, OffsetDateTime startTime, OffsetDateTime endTime);
 }

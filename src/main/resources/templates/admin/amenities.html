@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::content}, 'Quản lý Tiện ích')}">
+
+<div th:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Quản lý Tiện ích (Amenities)</h2>
+        <a th:href="@{/admin/amenities/create}" class="btn btn-primary">Tạo Tiện ích mới</a>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Tên Tiện ích</th>
+                    <th scope="col">Mô tả</th>
+                    <th scope="col" class="text-end">Hành động</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="amenity : ${amenities}">
+                    <th scope="row" th:text="${amenity.id}">1</th>
+                    <td th:text="${amenity.name}">Khăn tập</td>
+                    <td th:text="${amenity.description}">Dịch vụ khăn tập miễn phí</td>
+                    <td class="text-end">
+                        <a th:href="@{/admin/amenities/edit/{id}(id=${amenity.id})}" class="btn btn-sm btn-outline-primary">Sửa</a>
+                        <form th:action="@{/admin/amenities/delete/{id}(id=${amenity.id})}" method="post" class="d-inline ms-1">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc muốn XÓA tiện ích này?');">Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</html>

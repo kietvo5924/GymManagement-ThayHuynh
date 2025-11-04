@@ -27,7 +27,7 @@ public class MemberWebController {
     private final SubscriptionService subscriptionService;
     private final PackageService packageService;
     private final StaffService staffService;
-    private final PtSessionService ptSessionService;
+    private final PtBookingService ptBookingService; // <-- THÊM MỚI
 
     @GetMapping
     public String getMembersPage(Model model) {
@@ -35,7 +35,7 @@ public class MemberWebController {
         model.addAttribute("members", members);
         model.addAttribute("pageTitle", "Quản lý Hội viên");
         model.addAttribute("contentView", "members");
-        model.addAttribute("activePage", "members"); // <-- BÁO ACTIVE
+        model.addAttribute("activePage", "members");
         return "fragments/layout";
     }
 
@@ -44,7 +44,7 @@ public class MemberWebController {
         model.addAttribute("memberRequest", new MemberRequestDTO());
         model.addAttribute("pageTitle", "Tạo Hội viên mới");
         model.addAttribute("contentView", "member-form");
-        model.addAttribute("activePage", "members"); // <-- BÁO ACTIVE
+        model.addAttribute("activePage", "members");
         return "fragments/layout";
     }
 
@@ -53,7 +53,7 @@ public class MemberWebController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("pageTitle", "Tạo Hội viên mới");
             model.addAttribute("contentView", "member-form");
-            model.addAttribute("activePage", "members"); // <-- BÁO ACTIVE
+            model.addAttribute("activePage", "members");
             return "fragments/layout";
         }
         try {
@@ -64,7 +64,7 @@ public class MemberWebController {
             bindingResult.reject("globalError", e.getMessage());
             model.addAttribute("pageTitle", "Tạo Hội viên mới");
             model.addAttribute("contentView", "member-form");
-            model.addAttribute("activePage", "members"); // <-- BÁO ACTIVE
+            model.addAttribute("activePage", "members");
             return "fragments/layout";
         }
     }
@@ -83,7 +83,7 @@ public class MemberWebController {
             model.addAttribute("memberId", memberId);
             model.addAttribute("pageTitle", "Chỉnh sửa: " + member.getFullName());
             model.addAttribute("contentView", "member-form");
-            model.addAttribute("activePage", "members"); // <-- BÁO ACTIVE
+            model.addAttribute("activePage", "members");
             return "fragments/layout";
         } catch (Exception e) { return "redirect:/members"; }
     }
@@ -94,7 +94,7 @@ public class MemberWebController {
             model.addAttribute("memberId", memberId);
             model.addAttribute("pageTitle", "Chỉnh sửa Hội viên");
             model.addAttribute("contentView", "member-form");
-            model.addAttribute("activePage", "members"); // <-- BÁO ACTIVE
+            model.addAttribute("activePage", "members");
             return "fragments/layout";
         }
         try {
@@ -106,42 +106,55 @@ public class MemberWebController {
             model.addAttribute("memberId", memberId);
             model.addAttribute("pageTitle", "Chỉnh sửa Hội viên");
             model.addAttribute("contentView", "member-form");
-            model.addAttribute("activePage", "members"); // <-- BÁO ACTIVE
+            model.addAttribute("activePage", "members");
             return "fragments/layout";
         }
     }
 
+
+    // --- SỬA HÀM NÀY ---
     @GetMapping("/detail/{memberId}")
     public String getMemberDetailPage(@PathVariable("memberId") Long memberId, Model model) {
         try {
             MemberResponseDTO member = memberService.getMemberById(memberId);
             model.addAttribute("memberProfile", member);
+
+            // Lấy danh sách gói tập (như cũ)
             List<SubscriptionResponseDTO> subscriptions = subscriptionService.getSubscriptionsByMemberId(memberId);
             model.addAttribute("memberSubscriptions", subscriptions);
+
+            // Lấy Lịch sử đặt PT (MỚI)
+            List<PtBookingResponseDTO> ptBookings = ptBookingService.getBookingsByMemberId(memberId);
+            model.addAttribute("ptBookings", ptBookings);
+
+            // Load data cho các modal (như cũ, nhưng không cần allPts nữa)
             List<PackageResponseDTO> allPackages = packageService.getAllPackages().stream()
                     .filter(PackageResponseDTO::isActive)
                     .collect(Collectors.toList());
             model.addAttribute("allPackages", allPackages);
-            List<UserResponseDTO> allPts = staffService.getAllPts();
-            model.addAttribute("allPts", allPts);
+
+            // model.addAttribute("allPts", staffService.getAllPts()); // KHÔNG CẦN NỮA
+
             if (!model.containsAttribute("subRequest")) {
                 model.addAttribute("subRequest", new SubscriptionRequestDTO());
             }
             if (!model.containsAttribute("freezeRequest")) {
                 model.addAttribute("freezeRequest", new FreezeRequestDTO());
             }
-            if (!model.containsAttribute("logPtRequest")) {
-                model.addAttribute("logPtRequest", new com.gym.service.gymmanagementservice.dtos.PtLogRequestDTO());
-            }
+            // if (!model.containsAttribute("logPtRequest")) { // KHÔNG CẦN NỮA
+            //     model.addAttribute("logPtRequest", new com.gym.service.gymmanagementservice.dtos.PtLogRequestDTO());
+            // }
+
             model.addAttribute("pageTitle", "Hội viên: " + member.getFullName());
             model.addAttribute("contentView", "member-detail");
-            model.addAttribute("activePage", "members"); // <-- BÁO ACTIVE
+            model.addAttribute("activePage", "members");
             return "fragments/layout";
         } catch (Exception e) {
             return "redirect:/members";
         }
     }
 
+    // (Hàm processSubscriptionAction giữ nguyên)
     @PostMapping("/subscription/{action}")
     public String processSubscriptionAction(@PathVariable("action") String action, @Valid @ModelAttribute("subRequest") SubscriptionRequestDTO request, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         String redirectUrl = "redirect:/members/detail/" + request.getMemberId();
@@ -165,6 +178,7 @@ public class MemberWebController {
         return redirectUrl;
     }
 
+    // (Hàm processFreeze giữ nguyên)
     @PostMapping("/subscription/freeze/{subId}")
     public String processFreeze(@PathVariable("subId") Long subId, @RequestParam("memberId") Long memberId, @Valid @ModelAttribute("freezeRequest") FreezeRequestDTO request, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         String redirectUrl = "redirect:/members/detail/" + memberId;
@@ -181,6 +195,7 @@ public class MemberWebController {
         return redirectUrl;
     }
 
+    // (Hàm processUnfreeze giữ nguyên)
     @PostMapping("/subscription/unfreeze/{subId}")
     public String processUnfreeze(@PathVariable("subId") Long subId, @RequestParam("memberId") Long memberId, RedirectAttributes redirectAttributes) {
         try {
@@ -192,22 +207,12 @@ public class MemberWebController {
         return "redirect:/members/detail/" + memberId;
     }
 
+    // (Hàm processCancel giữ nguyên)
     @PostMapping("/subscription/cancel/{subId}")
     public String processCancel(@PathVariable("subId") Long subId, @RequestParam("memberId") Long memberId, RedirectAttributes redirectAttributes) {
         try {
             subscriptionService.cancelSubscription(subId);
             redirectAttributes.addFlashAttribute("successMessage", "Hủy gói tập thành công.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
-        }
-        return "redirect:/members/detail/" + memberId;
-    }
-
-    @PostMapping("/subscription/log-pt/{subId}")
-    public String processLogPtSession(@PathVariable("subId") Long subId, @RequestParam("memberId") Long memberId, @ModelAttribute("logPtRequest") com.gym.service.gymmanagementservice.dtos.PtLogRequestDTO request, RedirectAttributes redirectAttributes) {
-        try {
-            ptSessionService.logPtSession(subId, request.getNotes());
-            redirectAttributes.addFlashAttribute("successMessage", "Đã ghi nhận 1 buổi tập PT.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
         }

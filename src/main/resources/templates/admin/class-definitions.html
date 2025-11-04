@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::content}, 'Quản lý Loại Lớp')}">
+
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Quản lý Các Loại Lớp (Definitions)</h2>
+        <a th:href="@{/admin/class-definitions/create}" class="btn btn-primary">Tạo Loại Lớp mới</a>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Tên Loại Lớp</th>
+                    <th scope="col">Mô tả</th>
+                    <th scope="col">Trạng thái</th>
+                    <th scope="col" class="text-end">Hành động</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="def : ${definitions}">
+                    <th scope="row" th:text="${def.id}">1</th>
+                    <td th:text="${def.name}">Yoga Cơ Bản</td>
+                    <td th:text="${def.description}">Lớp yoga cho người mới</td>
+                    <td>
+                        <span th:if="${def.isActive}" class="badge bg-success">Đang hoạt động</span>
+                        <span th:if="${!def.isActive}" class="badge bg-danger">Không hoạt động</span>
+                    </td>
+                    <td class="text-end">
+                        <a th:href="@{/admin/class-definitions/edit/{id}(id=${def.id})}" class="btn btn-sm btn-outline-primary">Sửa</a>
+                        <form th:action="@{/admin/class-definitions/toggle/{id}(id=${def.id})}" method="post" class="d-inline ms-1">
+                            <button th:if="${def.isActive}" type="submit" class="btn btn-sm btn-outline-warning">Tắt</button>
+                            <button th:if="${!def.isActive}" type="submit" class="btn btn-sm btn-outline-success">Bật</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</html>

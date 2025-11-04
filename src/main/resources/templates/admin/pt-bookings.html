@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::content}, 'Quản lý Lịch hẹn PT')}">
+
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Quản lý Lịch hẹn PT (PT Bookings)</h2>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Hội viên</th>
+                    <th>PT</th>
+                    <th>Chi nhánh</th>
+                    <th>Thời gian</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Hành động (Admin)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="book : ${bookings}">
+                    <td th:text="${book.memberName}"></td>
+                    <td th:text="${book.ptName}"></td>
+                    <td th:text="${book.clubName}"></td>
+                    <td th:text="${#temporals.format(book.startTime.atZoneSameInstant(T(java.time.ZoneId).of('Asia/Ho_Chi_Minh')), 'dd/MM HH:mm')}"></td>
+                    <td>
+                        <span th:text="${book.status}" class="badge"
+                              th:classappend="${book.status.name() == 'COMPLETED'} ? 'bg-success' :
+                                               (${book.status.name() == 'CONFIRMED_BY_PT'} ? 'bg-primary' :
+                                               (${book.status.name() == 'REQUESTED_BY_MEMBER'} ? 'bg-warning text-dark' : 'bg-danger'))">
+                        </span>
+                    </td>
+
+                    <td class="text-end">
+                        <div th:if="${book.status.name() == 'REQUESTED_BY_MEMBER'}">
+                            <form th:action="@{/admin/pt-bookings/confirm/{id}(id=${book.bookingId})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success">Xác nhận</button>
+                            </form>
+                            <form th:action="@{/admin/pt-bookings/cancel/{id}(id=${book.bookingId})}" method="post" class="d-inline ms-1">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Hủy</button>
+                            </form>
+                        </div>
+
+                        <div th:if="${book.status.name() == 'CONFIRMED_BY_PT'}">
+                            <a th:href="@{/admin/pt-bookings/complete/{id}(id=${book.bookingId})}" class="btn btn-sm btn-primary">Hoàn thành</a>
+                            <form th:action="@{/admin/pt-bookings/cancel/{id}(id=${book.bookingId})}" method="post" class="d-inline ms-1">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Hủy</B>
+                            </form>
+                        </div>
+
+                        <span th:if="${book.status.name() == 'COMPLETED' or #strings.contains(book.status.name(), 'CANCELED')}" class="text-muted">
+                            Đã xử lý
+                        </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</html>

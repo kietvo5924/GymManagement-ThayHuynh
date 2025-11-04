@@ -36,7 +36,6 @@
         <li class="nav-item px-3 py-2 text-muted text-uppercase small" style="font-size: .75rem;">
             Nghiệp vụ
         </li>
-
         <li class="nav-item">
             <a class="nav-link" th:href="@{/check-in}"
                th:classappend="${activePage == 'checkIn'} ? 'active' : ''">
@@ -67,6 +66,12 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" th:href="@{/admin/clubs}"
+                   th:classappend="${activePage == 'adminClubs'} ? 'active' : ''">
+                    Quản lý Chi nhánh
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" th:href="@{/admin/packages}"
                    th:classappend="${activePage == 'adminPackages'} ? 'active' : ''">
                     Quản lý Gói tập
@@ -78,6 +83,32 @@
                     Quản lý Sản phẩm
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/admin/amenities}"
+                   th:classappend="${activePage == 'adminAmenities'} ? 'active' : ''">
+                    Quản lý Tiện ích
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/admin/class-definitions}"
+                   th:classappend="${activePage == 'adminClassDefinitions'} ? 'active' : ''">
+                    Quản lý Loại Lớp
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/admin/classes}"
+                   th:classappend="${activePage == 'adminClasses'} ? 'active' : ''">
+                    Quản lý Lịch Lớp
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/admin/pt-bookings}"
+                   th:classappend="${activePage == 'adminPtBookings'} ? 'active' : ''">
+                    Quản lý Lịch PT
+                </a>
+            </li>
+
             <li class="nav-item">
                 <a class="nav-link" th:href="@{/admin/schedules}"
                    th:classappend="${activePage == 'adminSchedules'} ? 'active' : ''">

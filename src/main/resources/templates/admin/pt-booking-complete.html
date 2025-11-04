@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::content}, ${pageTitle})}">
+
+<div th:fragment="content">
+    <h2 class="mb-4">Xác nhận Hoàn thành Buổi tập PT</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="alert alert-info">
+                <p class="mb-1"><strong>Hội viên:</strong> <span th:text="${booking.memberName}"></span></p>
+                <p class="mb-1"><strong>PT:</strong> <span th:text="${booking.ptName}"></span></p>
+                <p class="mb-0"><strong>Thời gian:</strong> <span th:text="${#temporals.format(booking.startTime.atZoneSameInstant(T(java.time.ZoneId).of('Asia/Ho_Chi_Minh')), 'dd/MM/yyyy HH:mm')}"></span></p>
+            </div>
+
+            <p>Xác nhận hoàn thành buổi tập này sẽ **TRỪ 1 BUỔI** trong gói PT của hội viên.</p>
+
+            <form th:action="@{/admin/pt-bookings/complete/{id}(id=${booking.bookingId})}"
+                  th:object="${notesRequest}"
+                  method="post">
+
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Ghi chú của PT/Admin (Tùy chọn)</label>
+                    <textarea th:field="*{notes}" id="notes" rows="3" class="form-control"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Xác nhận Hoàn thành</button>
+                <a th:href="@{/admin/pt-bookings}" class="btn btn-secondary">Hủy</a>
+            </form>
+        </div>
+    </div>
+</div>
+</html>

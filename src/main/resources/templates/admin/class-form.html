@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::content}, ${pageTitle})}">
+
+<div th:fragment="content">
+    <h2 class="mb-4" th:text="${pageTitle}">Tạo Lịch Lớp mới</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form th:action="@{/admin/classes/create}"
+                  th:object="${classRequest}"
+                  method="post">
+
+                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+                    <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="classDefinitionId" class="form-label">Chọn Loại Lớp</label>
+                            <select th:field="*{classDefinitionId}" id="classDefinitionId" class="form-select"
+                                    th:classappend="${#fields.hasErrors('classDefinitionId')} ? 'is-invalid' : ''">
+                                <option value="">-- Chọn loại lớp --</option>
+                                <option th:each="def : ${allClassDefinitions}"
+                                        th:value="${def.id}"
+                                        th:text="${def.name}"></option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('classDefinitionId')}" th:errors="*{classDefinitionId}" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="instructorId" class="form-label">Chọn HLV (Instructor)</label>
+                            <select th:field="*{instructorId}" id="instructorId" class="form-select"
+                                    th:classappend="${#fields.hasErrors('instructorId')} ? 'is-invalid' : ''">
+                                <option value="">-- Chọn HLV --</option>
+                                <option th:each="inst : ${allInstructors}"
+                                        th:value="${inst.id}"
+                                        th:text="${inst.fullName} + ' (' + ${inst.role} + ')'"></option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('instructorId')}" th:errors="*{instructorId}" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="clubId" class="form-label">Chọn Chi nhánh</label>
+                            <select th:field="*{clubId}" id="clubId" class="form-select"
+                                    th:classappend="${#fields.hasErrors('clubId')} ? 'is-invalid' : ''">
+                                <option value="">-- Chọn chi nhánh --</option>
+                                <option th:each="club : ${allClubs}"
+                                        th:value="${club.id}"
+                                        th:text="${club.name}"></option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('clubId')}" th:errors="*{clubId}" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="startTime" class="form-label">Thời gian bắt đầu</label>
+                            <input type="datetime-local" th:field="*{startTime}" id="startTime" class="form-control"
+                                   th:classappend="${#fields.hasErrors('startTime')} ? 'is-invalid' : ''">
+                            <div th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="endTime" class="form-label">Thời gian kết thúc</label>
+                            <input type="datetime-local" th:field="*{endTime}" id="endTime" class="form-control"
+                                   th:classappend="${#fields.hasErrors('endTime')} ? 'is-invalid' : ''">
+                            <div th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="maxCapacity" class="form-label">Số lượng hội viên tối đa</label>
+                    <input type="number" th:field="*{maxCapacity}" id="maxCapacity" class="form-control"
+                           th:classappend="${#fields.hasErrors('maxCapacity')} ? 'is-invalid' : ''">
+                    <div th:if="${#fields.hasErrors('maxCapacity')}" th:errors="*{maxCapacity}" class="invalid-feedback"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Tạo lịch</button>
+                <a th:href="@{/admin/classes}" class="btn btn-secondary">Hủy</a>
+            </form>
+        </div>
+    </div>
+</div>
+</html>

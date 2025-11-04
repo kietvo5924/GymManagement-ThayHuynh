@@ -46,7 +46,7 @@
                 <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label for="packageTypeSelect" class="form-label">Loại gói</label>
+                            <label for="packageTypeSelect" class="form-label">Loại gói (Chức năng)</label>
                             <select th:field="*{packageType}" id="packageTypeSelect" class="form-select"
                                     th:classappend="${#fields.hasErrors('packageType')} ? 'is-invalid' : ''">
                                 <option value="">-- Chọn loại gói --</option>
@@ -77,7 +77,55 @@
                     </div>
                 </div>
 
+                <div id="accessLogicWrapper">
+                    <hr>
+                    <h6>Cấu hình Quyền truy cập & Tiện ích</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="accessTypeSelect" class="form-label">Quyền truy cập (Phạm vi)</label>
+                                <select th:field="*{accessType}" id="accessTypeSelect" class="form-select"
+                                        th:classappend="${#fields.hasErrors('accessType')} ? 'is-invalid' : ''">
+                                    <option value="">-- Chọn quyền truy cập --</option>
+                                    <option th:each="type : ${allAccessTypes}"
+                                            th:value="${type}"
+                                            th:text="${type.name()} == 'SINGLE_CLUB' ? '1 Chi nhánh (Single Club)' : 'Tất cả Chi nhánh (All Clubs)'"></option>
+                                </select>
+                                <div th:if="${#fields.hasErrors('accessType')}" th:errors="*{accessType}" class="invalid-feedback"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6" id="targetClubWrapper" style="display: none;">
+                            <div class="mb-3">
+                                <label for="targetClubId" class="form-label">Chọn Chi nhánh áp dụng</label>
+                                <select th:field="*{targetClubId}" id="targetClubId" class="form-select"
+                                        th:classappend="${#fields.hasErrors('targetClubId')} ? 'is-invalid' : ''">
+                                    <option value="">-- Chọn chi nhánh --</option>
+                                    <option th:each="club : ${allClubs}"
+                                            th:value="${club.id}"
+                                            th:text="${club.name}"></option>
+                                </select>
+                                <div th:if="${#fields.hasErrors('targetClubId')}" th:errors="*{targetClubId}" class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Các tiện ích (Amenity) đi kèm</label>
+                        <div class="d-flex flex-wrap gap-3">
+                            <div th:each="amenity : ${allAmenities}" class="form-check">
+                                <input class="form-check-input" type="checkbox"
+                                       th:field="*{amenityIds}"
+                                       th:value="${amenity.id}"
+                                       th:id="'amenity_' + ${amenity.id}">
+                                <label class="form-check-label" th:for="'amenity_' + ${amenity.id}" th:text="${amenity.name}"></label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
                 <div id="timeLimitsWrapper">
+                    <hr>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -109,26 +157,44 @@
     <script th:inline="javascript">
         function togglePackageFields() {
             const packageType = document.getElementById('packageTypeSelect').value;
+            const accessType = document.getElementById('accessTypeSelect').value;
 
             const durationWrapper = document.getElementById('durationDaysWrapper');
             const sessionsWrapper = document.getElementById('numberOfSessionsWrapper');
             const timeLimitsWrapper = document.getElementById('timeLimitsWrapper');
 
+            // --- CÁC TRƯỜNG MỚI ---
+            const accessLogicWrapper = document.getElementById('accessLogicWrapper');
+            const targetClubWrapper = document.getElementById('targetClubWrapper');
+
             // Ẩn tất cả trước
             durationWrapper.style.display = 'none';
             sessionsWrapper.style.display = 'none';
             timeLimitsWrapper.style.display = 'none';
+            accessLogicWrapper.style.display = 'none';
+            targetClubWrapper.style.display = 'none';
+
 
             if (packageType === 'GYM_ACCESS') {
                 durationWrapper.style.display = 'block';
                 timeLimitsWrapper.style.display = 'block';
+                accessLogicWrapper.style.display = 'block'; // HIỆN LOGIC MỚI
+
             } else if (packageType === 'PT_SESSION') {
                 sessionsWrapper.style.display = 'block';
-                // Gói PT không có giới hạn giờ hoặc thời hạn
+                // Gói PT không có giới hạn giờ, thời hạn, hoặc logic Access (vì PT có thể dạy ở mọi CLB)
+                // (Tạm thời ẩn logic AccessType cho gói PT)
+
             } else if (packageType === 'PER_VISIT') {
                 durationWrapper.style.display = 'block';
                 sessionsWrapper.style.display = 'block';
                 timeLimitsWrapper.style.display = 'block';
+                accessLogicWrapper.style.display = 'block'; // HIỆN LOGIC MỚI
+            }
+
+            // --- Logic mới: Ẩn/hiện chọn CLB ---
+            if (accessType === 'SINGLE_CLUB' && packageType !== 'PT_SESSION') {
+                targetClubWrapper.style.display = 'block';
             }
         }
 
@@ -136,6 +202,7 @@
         document.addEventListener('DOMContentLoaded', togglePackageFields);
         // Chạy khi thay đổi dropdown
         document.getElementById('packageTypeSelect').addEventListener('change', togglePackageFields);
+        document.getElementById('accessTypeSelect').addEventListener('change', togglePackageFields); // THÊM MỚI
     </script>
 
 </div>

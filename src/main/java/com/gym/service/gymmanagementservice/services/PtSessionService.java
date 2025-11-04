@@ -5,7 +5,7 @@ import com.gym.service.gymmanagementservice.repositories.MemberPackageRepository
 import com.gym.service.gymmanagementservice.repositories.PtSessionLogRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException; // <-- Vẫn giữ import này
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,13 +36,6 @@ public class PtSessionService {
         }
         if (ptPackage.getRemainingSessions() == null || ptPackage.getRemainingSessions() <= 0) {
             throw new IllegalStateException("Gói PT đã hết số buổi tập.");
-        }
-
-        // Kiểm tra quyền của PT
-        if (currentUserRole == Role.PT) {
-            if (ptPackage.getAssignedPt() == null || !ptPackage.getAssignedPt().getId().equals(currentUser.getId())) {
-                throw new AccessDeniedException("PT không được gán cho gói tập này.");
-            }
         }
 
         // 1. Trừ 1 buổi tập

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.Set; // <-- IMPORT MỚI
 
 @Entity
 @Table(name = "packages")
@@ -33,7 +34,7 @@ public class GymPackage {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "package_type", nullable = false)
-    private PackageType packageType; // Phân loại gói
+    private PackageType packageType; // Giữ nguyên: GYM_ACCESS, PT_SESSION, PER_VISIT
 
     @Column(name = "duration_days")
     private Integer durationDays; // Dùng cho GYM_ACCESS, PER_VISIT
@@ -50,6 +51,23 @@ public class GymPackage {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "access_type") // Mặc định là SINGLE_CLUB nếu không set
+    private PackageAccessType accessType; // SINGLE_CLUB hoặc ALL_CLUBS
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "target_club_id")
+    private Club targetClub;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "package_amenities",
+            joinColumns = @JoinColumn(name = "package_id"),
+            inverseJoinColumns = @JoinColumn(name = "amenity_id")
+    )
+    private Set<Amenity> amenities;
+
+
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
 
@@ -60,6 +78,9 @@ public class GymPackage {
     protected void onCreate() {
         createdAt = OffsetDateTime.now();
         updatedAt = OffsetDateTime.now();
+        if (accessType == null) {
+            accessType = PackageAccessType.SINGLE_CLUB;
+        }
     }
 
     @PreUpdate

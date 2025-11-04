@@ -3,7 +3,9 @@ package com.gym.service.gymmanagementservice.controllers.web;
 import com.gym.service.gymmanagementservice.dtos.CheckInRequestDTO;
 import com.gym.service.gymmanagementservice.dtos.CheckInResponseDTO;
 import com.gym.service.gymmanagementservice.models.CheckInStatus;
+import com.gym.service.gymmanagementservice.models.Club;
 import com.gym.service.gymmanagementservice.services.CheckInService;
+import com.gym.service.gymmanagementservice.services.ClubService;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/check-in")
@@ -25,6 +29,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class CheckInWebController {
 
     private final CheckInService checkInService;
+    private final ClubService clubService;
 
     @GetMapping
     public String getCheckInPage(Model model) {
@@ -32,20 +37,26 @@ public class CheckInWebController {
             model.addAttribute("checkInRequest", new CheckInRequestDTO());
         }
 
+        // LẤY DANH SÁCH CLB ĐANG HOẠT ĐỘNG
+        List<Club> activeClubs = clubService.getAllActiveClubs();
+        model.addAttribute("activeClubs", activeClubs);
+
         model.addAttribute("pageTitle", "Check-in Hội viên");
         model.addAttribute("contentView", "check-in");
-        model.addAttribute("activePage", "checkIn"); // <-- BÁO ACTIVE
+        model.addAttribute("activePage", "checkIn");
         return "fragments/layout";
     }
 
     @PostMapping
     public String processCheckIn(@Valid @ModelAttribute("checkInRequest") CheckInRequestDTO request,
                                  BindingResult bindingResult,
-                                 RedirectAttributes redirectAttributes) {
+                                 RedirectAttributes redirectAttributes,
+                                 Model model) { // <-- THÊM MODEL
 
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.checkInRequest", bindingResult);
             redirectAttributes.addFlashAttribute("checkInRequest", request);
+
             return "redirect:/check-in";
         }
 
@@ -68,6 +79,8 @@ public class CheckInWebController {
             redirectAttributes.addFlashAttribute("checkInResponse", errorResponse);
         }
 
+        // Giữ lại clubId đã chọn cho lần check-in tiếp theo
+        redirectAttributes.addAttribute("clubId", request.getClubId());
         return "redirect:/check-in";
     }
 }
