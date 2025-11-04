@@ -9,11 +9,14 @@
 
             <h2 class="mb-4 text-center">Check-in Hội viên</h2>
 
+            <!-- THÀNH CÔNG -->
             <div th:if="${checkInSuccess != null and checkInSuccess}" class="card shadow-sm border-success mb-4">
                 <div class="card-body p-4 text-center">
                     <h1 class="display-3 text-success">✔️</h1>
                     <h3 class="card-title text-success" th:text="${checkInResponse.message}">Check-in thành công!</h3>
-                    <h5 th:if="${checkInResponse.clubName}" th:text="'Tại: ' + ${checkInResponse.clubName}" class="text-muted"></h5>
+                    <h5 th:if="${checkInResponse.clubName}"
+                        th:text="'Tại: ' + ${checkInResponse.clubName}"
+                        th:class="'text-muted'"></h5>
                     <hr>
                     <div class="text-start">
                         <p class="mb-1"><strong>Hội viên:</strong> <span th:text="${checkInResponse.memberFullName}"></span></p>
@@ -26,11 +29,14 @@
                 </div>
             </div>
 
+            <!-- THẤT BẠI -->
             <div th:if="${checkInError != null and checkInError}" class="card shadow-sm border-danger mb-4">
                 <div class="card-body p-4 text-center">
                     <h1 class="display-3 text-danger">❌</h1>
                     <h3 class="card-title text-danger" th:text="${checkInResponse.message}">Không tìm thấy hội viên!</h3>
-                    <p class="mb-1" th:if="${checkInResponse.clubName}" th:text="'Tại: ' + ${checkInResponse.clubName}" class="text-muted"></p>
+                    <p th:if="${checkInResponse.clubName}"
+                       th:text="'Tại: ' + ${checkInResponse.clubName}"
+                       th:class="'text-muted'"></p>
                     <hr>
                     <p class="mb-1" th:if="${checkInResponse.memberFullName != null}">
                         <strong>Hội viên:</strong> <span th:text="${checkInResponse.memberFullName}"></span>
@@ -40,15 +46,18 @@
                     </p>
                 </div>
             </div>
+
+            <!-- FORM CHECK-IN -->
             <div class="card shadow-sm">
                 <div class="card-body p-4">
                     <form th:action="@{/check-in}" th:object="${checkInRequest}" method="post">
 
+                        <!-- Chọn CLB -->
                         <div class="mb-3">
                             <label for="clubId" class="form-label fs-5">1. Chọn Chi nhánh (CLB)</label>
-
                             <select th:field="*{clubId}" id="clubId"
-                                    th:class="${#fields.hasErrors('clubId')} ? 'form-select form-select-lg is-invalid' : 'form-select form-select-lg'"
+                                    class="form-select form-select-lg"
+                                    th:classappend="${#fields.hasErrors('clubId')} ? ' is-invalid' : ''"
                                     required>
                                 <option value="">-- Vui lòng chọn chi nhánh --</option>
                                 <option th:each="club : ${activeClubs}"
@@ -57,20 +66,24 @@
                                         th:selected="${param.clubId != null and param.clubId[0] == club.id.toString()}">
                                 </option>
                             </select>
-
-                            <div th:if="${#fields.hasErrors('clubId')}" th:errors="*{clubId}" class="invalid-feedback"></div>
+                            <div th:if="${#fields.hasErrors('clubId')}"
+                                 th:errors="*{clubId}"
+                                 class="invalid-feedback"></div>
                         </div>
 
-
+                        <!-- Barcode / SĐT -->
                         <div class="mb-3">
                             <label for="barcode" class="form-label fs-5">2. Quét mã QR hoặc Nhập SĐT</label>
-
-                            <input type="text" th:field="*{barcode}" id="barcode"
-                                   th:class="${#fields.hasErrors('barcode')} ? 'form-control form-control-lg is-invalid' : 'form-control form-control-lg'"
+                            <input type="text"
+                                   th:field="*{barcode}"
+                                   id="barcode"
+                                   class="form-control form-control-lg"
+                                   th:classappend="${#fields.hasErrors('barcode')} ? ' is-invalid' : ''"
                                    autofocus
                                    autocomplete="off">
-
-                            <div th:if="${#fields.hasErrors('barcode')}" th:errors="*{barcode}" class="invalid-feedback"></div>
+                            <div th:if="${#fields.hasErrors('barcode')}"
+                                 th:errors="*{barcode}"
+                                 class="invalid-feedback"></div>
                         </div>
 
                         <div class="d-grid">
@@ -83,6 +96,7 @@
         </div>
     </div>
 
+    <!-- JS -->
     <script th:inline="javascript">
         document.addEventListener('DOMContentLoaded', function() {
             const clubSelect = document.getElementById('clubId');
@@ -96,13 +110,11 @@
             setTimeout(function() {
                 const currentClubId = /*[[${param.clubId != null ? param.clubId[0] : ''}]]*/ '';
                 let redirectUrl = /*[[@{/check-in}]]*/ '/check-in';
-
-                if(currentClubId) {
+                if (currentClubId) {
                     redirectUrl += '?clubId=' + encodeURIComponent(currentClubId);
                 }
-
                 window.location.href = redirectUrl;
-            }, 5000); // 5 giây
+            }, 5000);
             /*[/]*/
         });
     </script>
